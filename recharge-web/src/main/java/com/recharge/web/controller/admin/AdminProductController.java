@@ -29,9 +29,11 @@ public class AdminProductController {
     public Result<Page<Product>> list(
             @RequestParam(name = "pageNum", defaultValue = "1") Integer pageNum,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "disable", required = false) Integer disable) {
 
         LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(title != null && !title.isEmpty(), Product::getTitle, title);
         wrapper.eq(disable != null, Product::getDisable, disable);
         wrapper.orderByAsc(Product::getPrice);
 

@@ -62,15 +62,15 @@ public class AdminStatsController {
         );
         stats.put("todayOrders", todayOrders);
 
-        // 成功订单数
+        // 成功订单数 (status=3 充值成功)
         Long successOrders = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 2)
+            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 3)
         );
         stats.put("successOrders", successOrders);
 
-        // 待处理订单
+        // 待处理订单 (status in 0,1,2: 待支付、支付中、充值中)
         Long pendingOrders = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().in(Order::getStatus, 0, 1)
+            new LambdaQueryWrapper<Order>().in(Order::getStatus, 0, 1, 2)
         );
         stats.put("pendingOrders", pendingOrders);
 
@@ -115,17 +115,21 @@ public class AdminStatsController {
         Map<String, Object> stats = new HashMap<>();
 
         Long total = orderMapper.selectCount(null);
+        // 待支付 (status=0)
         Long pending = orderMapper.selectCount(
             new LambdaQueryWrapper<Order>().eq(Order::getStatus, 0)
         );
+        // 处理中 (status in 1,2: 支付中、充值中)
         Long processing = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 1)
+            new LambdaQueryWrapper<Order>().in(Order::getStatus, 1, 2)
         );
+        // 成功 (status=3 充值成功)
         Long success = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 2)
+            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 3)
         );
+        // 失败 (status=4 充值失败)
         Long failed = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().lt(Order::getStatus, 0)
+            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 4)
         );
 
         stats.put("total", total);
@@ -163,15 +167,15 @@ public class AdminStatsController {
         );
         stats.put("todayOrders", todayOrders);
 
-        // 成功订单数
+        // 成功订单数 (status=3 充值成功)
         Long successOrders = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 2)
+            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 3)
         );
         stats.put("successOrders", successOrders);
 
-        // 待处理订单
+        // 待处理订单 (status in 0,1,2: 待支付、支付中、充值中)
         Long pendingOrders = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().in(Order::getStatus, 0, 1)
+            new LambdaQueryWrapper<Order>().in(Order::getStatus, 0, 1, 2)
         );
         stats.put("pendingOrders", pendingOrders);
 
@@ -198,18 +202,21 @@ public class AdminStatsController {
         // 产品总数
         Long total = productMapper.selectCount(null);
         stats.put("total", total);
+        stats.put("totalProducts", total);  // 兼容Products.vue页面
 
-        // 启用的产品数 (disable=0 表示启用)
+        // 启用的产品数 (disable=1 表示启用)
         Long enabled = productMapper.selectCount(
-            new LambdaQueryWrapper<Product>().eq(Product::getDisable, 0)
-        );
-        stats.put("enabled", enabled);
-
-        // 禁用的产品数 (disable=1 表示禁用)
-        Long disabled = productMapper.selectCount(
             new LambdaQueryWrapper<Product>().eq(Product::getDisable, 1)
         );
+        stats.put("enabled", enabled);
+        stats.put("enabledProducts", enabled);  // 兼容Products.vue页面
+
+        // 禁用的产品数 (disable=0 表示禁用)
+        Long disabled = productMapper.selectCount(
+            new LambdaQueryWrapper<Product>().eq(Product::getDisable, 0)
+        );
         stats.put("disabled", disabled);
+        stats.put("disabledProducts", disabled);  // 兼容Products.vue页面
 
         return Result.success(stats);
     }
