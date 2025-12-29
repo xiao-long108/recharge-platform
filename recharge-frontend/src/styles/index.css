@@ -1,0 +1,241 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Variables - brloto-admin style theme */
+:root {
+  /* Primary brand colors (Blue theme) */
+  --primary: 212 100% 45%;
+  --primary-foreground: 0 0% 98%;
+  --primary-hover: 212 100% 50%;
+  --primary-active: 212 100% 40%;
+
+  /* Semantic colors */
+  --success: 144 57% 58%;
+  --success-foreground: 0 0% 98%;
+  --warning: 42 84% 61%;
+  --warning-foreground: 0 0% 98%;
+  --destructive: 359 100% 65%;
+  --destructive-foreground: 0 0% 98%;
+
+  /* UI colors */
+  --background: 0 0% 100%;
+  --background-deep: 216 20% 95%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 212 100% 45%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+
+  /* Border radius */
+  --radius: 0.5rem;
+}
+
+/* Dark mode */
+.dark {
+  --primary: 212 100% 55%;
+  --primary-foreground: 0 0% 98%;
+  --primary-hover: 212 100% 60%;
+  --primary-active: 212 100% 50%;
+
+  --success: 144 57% 50%;
+  --success-foreground: 0 0% 98%;
+  --warning: 42 84% 55%;
+  --warning-foreground: 0 0% 98%;
+  --destructive: 359 100% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  --background: 240 10% 3.9%;
+  --background-deep: 240 10% 6%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 212 100% 55%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    @apply h-full m-0 p-0 bg-background-deep text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    font-size: 16px;
+  }
+
+  #app {
+    @apply h-full;
+  }
+}
+
+/* Component utilities */
+@layer components {
+  /* Flex center utilities */
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+
+  .flex-col-center {
+    @apply flex flex-col items-center justify-center;
+  }
+
+  /* Card box */
+  .card-box {
+    @apply bg-card text-card-foreground rounded-lg border border-border p-4 shadow-sm;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply min-h-screen bg-background-deep pb-16;
+  }
+
+  /* Primary link */
+  .vben-link {
+    @apply text-primary hover:text-primary-hover active:text-primary-active cursor-pointer transition-colors;
+  }
+
+  /* Amount display */
+  .amount {
+    @apply font-bold text-destructive;
+  }
+
+  .amount-success {
+    @apply font-bold text-success;
+  }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 h-14 bg-card flex justify-around items-center border-t border-border z-50;
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center justify-center flex-1 h-full text-muted-foreground text-xs no-underline transition-colors;
+  }
+
+  .nav-item.active {
+    @apply text-primary;
+  }
+
+  .nav-item .icon {
+    @apply text-2xl mb-1;
+  }
+
+  /* List item */
+  .list-item {
+    @apply flex justify-between items-center py-3 border-b border-border last:border-b-0;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply w-full h-11 bg-primary text-primary-foreground border-none rounded-full text-base cursor-pointer transition-all;
+    @apply hover:bg-primary-hover active:bg-primary-active disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  /* Form group */
+  .form-group {
+    @apply mb-4;
+  }
+
+  .form-group label {
+    @apply block mb-2 text-foreground text-sm;
+  }
+
+  .form-group input {
+    @apply w-full h-11 px-3 border border-border rounded-lg text-sm bg-card;
+    @apply focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/20;
+  }
+
+  /* Page header */
+  .page-header {
+    @apply bg-primary text-primary-foreground p-4 text-center;
+  }
+
+  .page-header .title {
+    @apply text-lg font-bold;
+  }
+
+  /* Empty state */
+  .empty-state {
+    @apply text-center py-10 px-5 text-muted-foreground;
+  }
+
+  .empty-state .icon {
+    @apply text-5xl mb-4;
+  }
+
+  /* User card gradient (similar to brloto-admin) */
+  .user-card-gradient {
+    @apply bg-gradient-to-r from-primary to-[hsl(180,70%,45%)] text-white rounded-lg p-4;
+  }
+
+  /* Menu card */
+  .menu-card {
+    @apply bg-card rounded-lg overflow-hidden;
+  }
+
+  .menu-item {
+    @apply flex items-center justify-between p-4 border-b border-border last:border-b-0 cursor-pointer transition-colors;
+    @apply hover:bg-muted;
+  }
+
+  /* Status badges */
+  .status-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+  }
+
+  .status-pending {
+    @apply bg-warning/10 text-warning;
+  }
+
+  .status-processing {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .status-completed {
+    @apply bg-success/10 text-success;
+  }
+
+  .status-failed {
+    @apply bg-destructive/10 text-destructive;
+  }
+
+  /* Grid layouts */
+  .grid-4 {
+    @apply grid grid-cols-4 gap-3;
+  }
+
+  .grid-3 {
+    @apply grid grid-cols-3 gap-3;
+  }
+
+  /* Product item */
+  .product-item {
+    @apply bg-card rounded-lg p-3 text-center cursor-pointer transition-all border border-transparent;
+    @apply hover:border-primary hover:shadow-md;
+  }
+
+  .product-item.selected {
+    @apply border-primary bg-primary/5;
+  }
+}
+
+/* Ant Design Vue theme overrides */
+:root {
+  --ant-primary-color: hsl(212, 100%, 45%);
+  --ant-success-color: hsl(144, 57%, 58%);
+  --ant-warning-color: hsl(42, 84%, 61%);
+  --ant-error-color: hsl(359, 100%, 65%);
+}

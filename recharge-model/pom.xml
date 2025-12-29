@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.recharge</groupId>
+        <artifactId>recharge-platform</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>recharge-model</artifactId>
+    <packaging>jar</packaging>
+    <name>recharge-model</name>
+    <description>实体模块 - Entity、DTO、VO</description>
+
+    <dependencies>
+        <!-- Common -->
+        <dependency>
+            <groupId>com.recharge</groupId>
+            <artifactId>recharge-common</artifactId>
+        </dependency>
+
+        <!-- MyBatis-Plus -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+    </dependencies>
+</project>

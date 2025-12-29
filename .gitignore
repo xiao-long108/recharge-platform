@@ -1,0 +1,6 @@
+# 项目排除路径
+/recharge-common/target/
+/recharge-mapper/target/
+/recharge-model/target/
+/recharge-service/target/
+/recharge-web/target/
