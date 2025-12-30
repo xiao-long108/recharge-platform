@@ -1,0 +1,1 @@
+import{g as e,p as t,a as n}from"./request-C-LQhwRX.js";function s(r){return t("/v1/orders",r)}function o(r){return t("/v1/orders/pay",r)}function c(r){return n(`/v1/orders/${r}/cancel`)}function u(r){return e("/v1/orders",{params:r})}function d(r){return e(`/v1/orders/${r}`)}export{u as a,c as b,s as c,d as g,o as p};

@@ -1,0 +1,57 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: recharge-platform
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://database-1-instance-1.cj6g0swoaxdv.ap-southeast-1.rds.amazonaws.com/huafei_api?useUnicode=true&characterEncoding=utf8&useSSL=false&tinyInt1isBit=true&serverTimezone=Hongkong&allowMultiQueries=true&autoReconnect=true
+    username: admin
+    password: admin123
+  data:
+    redis:
+      host: develop-redis-bxgqa1.serverless.apse1.cache.amazonaws.com
+      port: 6379
+      password: ""
+      database: 0
+      timeout: 10000ms
+
+# File upload config
+file:
+  upload:
+    path: /home/ec2-user/app/uploads
+    url-prefix: /uploads
+
+# JWT config
+jwt:
+  secret: recharge-platform-production-secret-key-2024-very-long-and-secure
+
+# MyBatis-Plus config
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.recharge.model.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleteTime
+      logic-delete-value: "NOW()"
+      logic-not-delete-value: "NULL"
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+# Logging
+logging:
+  level:
+    com.recharge: info
+    org.springframework.security: warn
+  file:
+    name: /home/ec2-user/app/logs/app.log

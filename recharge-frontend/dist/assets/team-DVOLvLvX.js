@@ -1,0 +1,1 @@
+import{g as t}from"./request-C-LQhwRX.js";function m(e){return t("/v1/team/members",{params:{level:e}})}function r(){return t("/v1/team/stats")}function a(e){return t("/v1/team/commission/records",{params:e})}export{m as a,a as b,r as g};

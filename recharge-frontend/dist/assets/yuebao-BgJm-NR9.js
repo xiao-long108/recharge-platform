@@ -1,0 +1,1 @@
+import{g as r,p as e}from"./request-C-LQhwRX.js";function o(){return r("/v1/yuebao/account")}function a(t){return e("/v1/yuebao/transfer-in",t)}function u(t){return e("/v1/yuebao/transfer-out",t)}function s(t){return r("/v1/yuebao/records",{params:t})}export{s as a,u as b,o as g,a as t};
