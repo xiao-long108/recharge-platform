@@ -62,15 +62,15 @@ public class AdminStatsController {
         );
         stats.put("todayOrders", todayOrders);
 
-        // 成功订单数 (status=3 充值成功)
+        // 成功订单数 (status=2 充值成功)
         Long successOrders = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 3)
+            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 2)
         );
         stats.put("successOrders", successOrders);
 
-        // 待处理订单 (status in 0,1,2: 待支付、支付中、充值中)
+        // 待处理订单 (status in 0,1: 待支付、处理中)
         Long pendingOrders = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().in(Order::getStatus, 0, 1, 2)
+            new LambdaQueryWrapper<Order>().in(Order::getStatus, 0, 1)
         );
         stats.put("pendingOrders", pendingOrders);
 
@@ -82,9 +82,9 @@ public class AdminStatsController {
         );
         stats.put("pendingWithdraws", pendingWithdraws);
 
-        // 总交易金额（已支付订单）
-        // 简化处理，实际应该用sum聚合
-        stats.put("totalAmount", BigDecimal.ZERO);
+        // 总交易金额（成功订单）
+        BigDecimal totalAmount = orderMapper.sumTotalAmount();
+        stats.put("totalAmount", totalAmount != null ? totalAmount : BigDecimal.ZERO);
 
         return Result.success(stats);
     }
@@ -94,6 +94,8 @@ public class AdminStatsController {
     public Result<Map<String, Object>> userStats() {
         Map<String, Object> stats = new HashMap<>();
 
+        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+
         Long total = userMapper.selectCount(null);
         Long normal = userMapper.selectCount(
             new LambdaQueryWrapper<User>().eq(User::getStatus, 1)
@@ -101,10 +103,21 @@ public class AdminStatsController {
         Long frozen = userMapper.selectCount(
             new LambdaQueryWrapper<User>().eq(User::getStatus, 2)
         );
+        Long todayUsers = userMapper.selectCount(
+            new LambdaQueryWrapper<User>().ge(User::getCreateTime, todayStart)
+        );
 
         stats.put("total", total);
+        stats.put("totalUsers", total);  // Alias for frontend
         stats.put("normal", normal);
         stats.put("frozen", frozen);
+        stats.put("todayUsers", todayUsers);
+
+        // 统计所有用户总余额和总佣金
+        BigDecimal totalBalance = userMapper.sumTotalBalance();
+        BigDecimal totalCommission = userMapper.sumTotalCommission();
+        stats.put("totalBalance", totalBalance != null ? totalBalance : BigDecimal.ZERO);
+        stats.put("totalCommission", totalCommission != null ? totalCommission : BigDecimal.ZERO);
 
         return Result.success(stats);
     }
@@ -119,17 +132,17 @@ public class AdminStatsController {
         Long pending = orderMapper.selectCount(
             new LambdaQueryWrapper<Order>().eq(Order::getStatus, 0)
         );
-        // 处理中 (status in 1,2: 支付中、充值中)
+        // 处理中 (status=1: 处理中)
         Long processing = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().in(Order::getStatus, 1, 2)
+            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 1)
         );
-        // 成功 (status=3 充值成功)
+        // 成功 (status=2 充值成功)
         Long success = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 3)
+            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 2)
         );
-        // 失败 (status=4 充值失败)
+        // 失败 (status=-1 充值失败, status=-3 已退款)
         Long failed = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 4)
+            new LambdaQueryWrapper<Order>().in(Order::getStatus, -1, -3)
         );
 
         stats.put("total", total);
@@ -146,12 +159,14 @@ public class AdminStatsController {
     public Result<Map<String, Object>> stats() {
         Map<String, Object> stats = new HashMap<>();
 
+        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime monthStart = LocalDateTime.of(LocalDate.now().withDayOfMonth(1), LocalTime.MIN);
+
         // 用户统计
         Long totalUsers = userMapper.selectCount(null);
         stats.put("totalUsers", totalUsers);
 
         // 今日新增用户
-        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         Long todayUsers = userMapper.selectCount(
             new LambdaQueryWrapper<User>().ge(User::getCreateTime, todayStart)
         );
@@ -161,25 +176,26 @@ public class AdminStatsController {
         Long totalOrders = orderMapper.selectCount(null);
         stats.put("totalOrders", totalOrders);
 
-        // 今日订单
+        // 今日订单数
         Long todayOrders = orderMapper.selectCount(
             new LambdaQueryWrapper<Order>().ge(Order::getCreateTime, todayStart)
         );
         stats.put("todayOrders", todayOrders);
+        stats.put("todayCount", todayOrders);  // 兼容Orders.vue
 
-        // 成功订单数 (status=3 充值成功)
+        // 成功订单数 (status=2 充值成功)
         Long successOrders = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 3)
+            new LambdaQueryWrapper<Order>().eq(Order::getStatus, 2)
         );
         stats.put("successOrders", successOrders);
 
-        // 待处理订单 (status in 0,1,2: 待支付、支付中、充值中)
+        // 待处理订单 (status in 0,1: 待支付、处理中)
         Long pendingOrders = orderMapper.selectCount(
-            new LambdaQueryWrapper<Order>().in(Order::getStatus, 0, 1, 2)
+            new LambdaQueryWrapper<Order>().in(Order::getStatus, 0, 1)
         );
         stats.put("pendingOrders", pendingOrders);
 
-        // 产品统计
+        // 产品统计 (老表没有deleted字段)
         Long totalProducts = productMapper.selectCount(null);
         stats.put("totalProducts", totalProducts);
 
@@ -191,6 +207,23 @@ public class AdminStatsController {
         );
         stats.put("pendingWithdraws", pendingWithdraws);
 
+        // 今日充值金额
+        BigDecimal todayAmount = orderMapper.sumTodayAmount();
+        stats.put("todayAmount", todayAmount != null ? todayAmount : BigDecimal.ZERO);
+
+        // 本月充值金额
+        BigDecimal monthAmount = orderMapper.sumMonthAmount();
+        stats.put("monthAmount", monthAmount != null ? monthAmount : BigDecimal.ZERO);
+
+        // 笔均金额
+        BigDecimal totalAmount = orderMapper.sumTotalAmount();
+        Long successCount = orderMapper.countSuccessOrders();
+        BigDecimal avgAmount = BigDecimal.ZERO;
+        if (successCount != null && successCount > 0 && totalAmount != null) {
+            avgAmount = totalAmount.divide(BigDecimal.valueOf(successCount), 2, java.math.RoundingMode.HALF_UP);
+        }
+        stats.put("avgAmount", avgAmount);
+
         return Result.success(stats);
     }
 
@@ -199,24 +232,31 @@ public class AdminStatsController {
     public Result<Map<String, Object>> productStats() {
         Map<String, Object> stats = new HashMap<>();
 
-        // 产品总数
+        // 产品总数 (老表没有deleted字段)
         Long total = productMapper.selectCount(null);
         stats.put("total", total);
         stats.put("totalProducts", total);  // 兼容Products.vue页面
 
-        // 启用的产品数 (disable=1 表示启用)
+        // 上架的产品数 (disable=1 表示启用)
         Long enabled = productMapper.selectCount(
             new LambdaQueryWrapper<Product>().eq(Product::getDisable, 1)
         );
         stats.put("enabled", enabled);
         stats.put("enabledProducts", enabled);  // 兼容Products.vue页面
 
-        // 禁用的产品数 (disable=0 表示禁用)
+        // 下架的产品数 (disable=0 表示禁用)
         Long disabled = productMapper.selectCount(
             new LambdaQueryWrapper<Product>().eq(Product::getDisable, 0)
         );
         stats.put("disabled", disabled);
         stats.put("disabledProducts", disabled);  // 兼容Products.vue页面
+
+        // 今日订单数
+        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        Long todayOrders = orderMapper.selectCount(
+            new LambdaQueryWrapper<Order>().ge(Order::getCreateTime, todayStart)
+        );
+        stats.put("todayOrders", todayOrders);
 
         return Result.success(stats);
     }

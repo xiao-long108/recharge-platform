@@ -136,3 +136,66 @@ export interface Result<T> {
   message: string
   data: T
 }
+
+// 公告
+export interface Notice {
+  id: number
+  title: string
+  content: string
+  type: number
+  isTop: number
+  status: number
+  createdTime: string
+}
+
+// 轮播图
+export interface Banner {
+  id: number
+  title: string
+  imageUrl: string
+  linkUrl: string
+  position: number
+  sort: number
+  status: number
+}
+
+// 优惠券模板
+export interface Coupon {
+  id: number
+  name: string
+  type: number
+  minAmount: number
+  discountAmount: number
+  discountRate: number
+  totalCount: number
+  claimedCount: number
+  perLimit: number
+  startTime: string
+  endTime: string
+  status: number
+}
+
+// 用户优惠券
+export interface UserCoupon {
+  id: number
+  userId: number
+  couponId: number
+  couponName: string
+  type: number
+  minAmount: number
+  discountAmount: number
+  discountRate: number
+  status: number
+  expireTime: string
+  usedTime: string
+  createdTime: string
+}
+
+// 签到记录
+export interface SignRecord {
+  id: number
+  userId: number
+  reward: number
+  continuousDays: number
+  signDate: string
+}

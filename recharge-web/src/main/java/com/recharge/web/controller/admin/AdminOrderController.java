@@ -6,6 +6,7 @@ import com.recharge.common.result.Result;
 import com.recharge.mapper.OrderMapper;
 import com.recharge.mapper.UserMapper;
 import com.recharge.model.entity.Order;
+import com.recharge.model.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 管理后台 - 订单管理控制器
@@ -26,10 +31,11 @@ public class AdminOrderController {
 
     private final OrderMapper orderMapper;
     private final UserMapper userMapper;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Operation(summary = "订单列表")
     @GetMapping
-    public Result<Page<Order>> list(
+    public Result<Map<String, Object>> list(
             @RequestParam(name = "pageNum", defaultValue = "1") Integer pageNum,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(name = "orderNo", required = false) String orderNo,
@@ -43,19 +49,73 @@ public class AdminOrderController {
         wrapper.orderByDesc(Order::getCreateTime);
 
         Page<Order> page = orderMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
-        return Result.success(page);
+
+        // Convert to frontend format with user info
+        List<Map<String, Object>> records = page.getRecords().stream()
+                .map(this::convertToFrontendFormat)
+                .collect(Collectors.toList());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", records);
+        result.put("total", page.getTotal());
+        result.put("size", page.getSize());
+        result.put("current", page.getCurrent());
+
+        return Result.success(result);
+    }
+
+    /**
+     * Convert order to frontend format with user info
+     */
+    private Map<String, Object> convertToFrontendFormat(Order order) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", order.getId());
+        map.put("orderNo", order.getOrderNo());
+        map.put("userId", order.getUserId());
+        map.put("mobile", order.getMobile());
+        map.put("price", order.getPrice());
+        map.put("payAmount", order.getPayAmount());
+        map.put("payMethod", order.getPayMethod());
+        map.put("payChannel", order.getPayMethod()); // Alias for frontend
+        map.put("payStatus", order.getPayStatus());
+        map.put("status", order.getStatus());
+        map.put("profit", order.getProfit());
+        map.put("createTime", order.getCreateTime() != null ? order.getCreateTime().format(FORMATTER) : null);
+        map.put("updateTime", order.getUpdateTime() != null ? order.getUpdateTime().format(FORMATTER) : null);
+        map.put("endTime", order.getEndTime() != null ? order.getEndTime().format(FORMATTER) : null);
+        map.put("payTime", order.getEndTime() != null ? order.getEndTime().format(FORMATTER) : null); // Alias
+
+        // Add user info
+        if (order.getUserId() != null) {
+            User user = userMapper.selectById(order.getUserId());
+            if (user != null) {
+                map.put("userNickname", user.getNickname());
+                map.put("userAvatar", user.getHead());
+            } else {
+                map.put("userNickname", "用户" + order.getUserId());
+                map.put("userAvatar", null);
+            }
+        } else {
+            map.put("userNickname", "未知用户");
+            map.put("userAvatar", null);
+        }
+
+        return map;
     }
 
     @Operation(summary = "订单详情")
     @GetMapping("/{orderId}")
-    public Result<Order> detail(@PathVariable Long orderId) {
+    public Result<Map<String, Object>> detail(@PathVariable("orderId") Long orderId) {
         Order order = orderMapper.selectById(orderId);
-        return Result.success(order);
+        if (order == null) {
+            return Result.fail("订单不存在");
+        }
+        return Result.success(convertToFrontendFormat(order));
     }
 
     @Operation(summary = "修改订单状态")
     @PutMapping("/{orderId}/status")
-    public Result<Void> updateStatus(@PathVariable Long orderId,
+    public Result<Void> updateStatus(@PathVariable("orderId") Long orderId,
                                      @RequestBody Map<String, Integer> body) {
         Integer status = body.get("status");
         Order order = orderMapper.selectById(orderId);
@@ -77,7 +137,7 @@ public class AdminOrderController {
 
     @Operation(summary = "手动退款")
     @PostMapping("/{orderId}/refund")
-    public Result<Void> refund(@PathVariable Long orderId) {
+    public Result<Void> refund(@PathVariable("orderId") Long orderId) {
         Order order = orderMapper.selectById(orderId);
         if (order == null) {
             return Result.fail("订单不存在");

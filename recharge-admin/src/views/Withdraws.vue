@@ -235,16 +235,12 @@ const getStatusColor = (status: number) => {
 
 const fetchStats = async () => {
   try {
-    const res = await request.get('/api/admin/stats/withdraws')
+    const res = await request.get('/api/admin/withdraws/stats')
     if (res.data.code === 200) {
       Object.assign(stats, res.data.data)
     }
   } catch (e) {
-    // 使用模拟数据
-    stats.pendingCount = 23
-    stats.todayAmount = 568000
-    stats.monthAmount = 12580000
-    stats.totalAmount = 85680000
+    console.error('获取提现统计失败', e)
   }
 }
 

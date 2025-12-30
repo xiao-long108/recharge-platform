@@ -39,6 +39,23 @@
           <WalletOutlined />
           <span>提现管理</span>
         </a-menu-item>
+        <a-menu-item key="/stores">
+          <ShopOutlined />
+          <span>店铺管理</span>
+        </a-menu-item>
+        <a-sub-menu key="marketing">
+          <template #title>
+            <GiftOutlined />
+            <span>营销管理</span>
+          </template>
+          <a-menu-item key="/notices">公告管理</a-menu-item>
+          <a-menu-item key="/coupons">优惠券管理</a-menu-item>
+          <a-menu-item key="/banners">轮播图管理</a-menu-item>
+        </a-sub-menu>
+        <a-menu-item key="/settings">
+          <SettingOutlined />
+          <span>系统设置</span>
+        </a-menu-item>
       </a-menu>
     </a-layout-sider>
 
@@ -98,6 +115,9 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   LogoutOutlined,
+  ShopOutlined,
+  GiftOutlined,
+  SettingOutlined,
 } from '@ant-design/icons-vue'
 
 const route = useRoute()

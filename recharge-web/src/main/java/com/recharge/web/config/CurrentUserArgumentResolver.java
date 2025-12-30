@@ -1,6 +1,6 @@
 package com.recharge.web.config;
 
-import com.recharge.web.config.CurrentUser;
+import com.recharge.common.exception.BusinessException;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,9 +28,18 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                                   NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = null;
+
         if (authentication != null && authentication.getPrincipal() instanceof Long) {
-            return authentication.getPrincipal();
+            userId = (Long) authentication.getPrincipal();
         }
-        return null;
+
+        // 检查是否必须登录
+        CurrentUser currentUser = parameter.getParameterAnnotation(CurrentUser.class);
+        if (currentUser != null && currentUser.required() && userId == null) {
+            throw new BusinessException(401, "请先登录");
+        }
+
+        return userId;
     }
 }

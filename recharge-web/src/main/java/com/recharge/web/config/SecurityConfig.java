@@ -31,11 +31,25 @@ public class SecurityConfig {
      * 白名单路径
      */
     private static final String[] WHITE_LIST = {
+            // 认证接口
             "/api/v1/auth/login",
             "/api/v1/auth/register",
+            // 产品接口
             "/api/v1/products/**",
+            // 首页接口
+            "/api/v1/index",
+            // 帮助中心接口
+            "/api/v1/help/**",
+            // 可领取优惠券（展示）
+            "/api/v1/coupons/available",
+            // 店铺商品列表（公开）
+            "/api/store/products/store/**",
+            // 管理后台接口
             "/api/admin/auth/login",
-            "/api/admin/**",  // 管理后台接口（生产环境应添加权限验证）
+            "/api/admin/**",
+            // 静态资源
+            "/uploads/**",
+            // Swagger文档
             "/doc.html",
             "/swagger-ui/**",
             "/swagger-resources/**",
@@ -68,7 +82,10 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:3001",
                 "http://127.0.0.1:3000",
-                "http://127.0.0.1:3001"
+                "http://127.0.0.1:3001",
+                "http://47.128.68.39",
+                "http://47.128.68.39:3000",
+                "http://47.128.68.39:8080"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));

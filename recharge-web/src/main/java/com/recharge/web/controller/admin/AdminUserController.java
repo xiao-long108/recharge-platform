@@ -12,7 +12,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 管理后台 - 用户管理控制器
@@ -24,10 +28,11 @@ import java.util.Map;
 public class AdminUserController {
 
     private final UserMapper userMapper;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Operation(summary = "用户列表")
     @GetMapping
-    public Result<Page<User>> list(
+    public Result<Map<String, Object>> list(
             @RequestParam(name = "pageNum", defaultValue = "1") Integer pageNum,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(name = "mobile", required = false) String mobile,
@@ -39,23 +44,57 @@ public class AdminUserController {
         wrapper.orderByDesc(User::getCreateTime);
 
         Page<User> page = userMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
-        return Result.success(page);
+
+        // Convert to frontend format
+        List<Map<String, Object>> records = page.getRecords().stream()
+                .map(this::convertToFrontendFormat)
+                .collect(Collectors.toList());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", records);
+        result.put("total", page.getTotal());
+        result.put("size", page.getSize());
+        result.put("current", page.getCurrent());
+
+        return Result.success(result);
+    }
+
+    /**
+     * Convert user to frontend format
+     */
+    private Map<String, Object> convertToFrontendFormat(User user) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", user.getId());
+        map.put("mobile", user.getMobile());
+        map.put("nickname", user.getNickname());
+        map.put("avatar", user.getHead()); // head -> avatar
+        map.put("head", user.getHead());
+        map.put("inviteCode", user.getInviteCode());
+        map.put("price", user.getPrice());
+        map.put("incomePrice", user.getIncomePrice());
+        map.put("cashPrice", user.getCashPrice());
+        map.put("level", user.getLevel());
+        map.put("invitees", user.getInvitees());
+        map.put("teamCount", user.getInvitees()); // Alias for frontend
+        map.put("status", user.getStatus());
+        map.put("createTime", user.getCreateTime() != null ? user.getCreateTime().format(FORMATTER) : null);
+        map.put("updateTime", user.getUpdateTime() != null ? user.getUpdateTime().format(FORMATTER) : null);
+        return map;
     }
 
     @Operation(summary = "用户详情")
     @GetMapping("/{userId}")
-    public Result<User> detail(@PathVariable Long userId) {
+    public Result<Map<String, Object>> detail(@PathVariable("userId") Long userId) {
         User user = userMapper.selectById(userId);
-        if (user != null) {
-            user.setPassword(null); // 隐藏密码
-            user.setPayPassword(null);
+        if (user == null) {
+            return Result.fail("用户不存在");
         }
-        return Result.success(user);
+        return Result.success(convertToFrontendFormat(user));
     }
 
     @Operation(summary = "修改用户状态")
     @PutMapping("/{userId}/status")
-    public Result<Void> updateStatus(@PathVariable Long userId,
+    public Result<Void> updateStatus(@PathVariable("userId") Long userId,
                                      @RequestBody Map<String, Integer> body) {
         Integer status = body.get("status");
         User user = userMapper.selectById(userId);
@@ -71,7 +110,7 @@ public class AdminUserController {
 
     @Operation(summary = "调整用户余额")
     @PutMapping("/{userId}/balance")
-    public Result<Void> adjustBalance(@PathVariable Long userId,
+    public Result<Void> adjustBalance(@PathVariable("userId") Long userId,
                                       @RequestBody Map<String, Object> body) {
         String type = (String) body.get("type"); // add 或 deduct
         Number amountNum = (Number) body.get("amount");
@@ -98,7 +137,7 @@ public class AdminUserController {
 
     @Operation(summary = "重置用户密码")
     @PutMapping("/{userId}/reset-password")
-    public Result<Void> resetPassword(@PathVariable Long userId) {
+    public Result<Void> resetPassword(@PathVariable("userId") Long userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
             return Result.fail("用户不存在");

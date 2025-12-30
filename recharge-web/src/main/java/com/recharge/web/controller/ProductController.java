@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 产品控制器 - 适配原数据库 cloud_times_api_huafei
+ * 产品控制器 - 用户端产品接口
  */
 @Tag(name = "产品管理", description = "充值产品")
 @RestController
@@ -25,7 +25,7 @@ public class ProductController {
     @Operation(summary = "产品列表")
     @GetMapping
     public Result<List<Product>> listProducts() {
-        // 原数据库字段: disable=1 表示启用
+        // 适配老表: disable=1表示启用, 按price(面值)升序
         LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<Product>()
                 .eq(Product::getDisable, 1)
                 .orderByAsc(Product::getPrice);
@@ -35,6 +35,11 @@ public class ProductController {
     @Operation(summary = "产品详情")
     @GetMapping("/{productId}")
     public Result<Product> getProduct(@PathVariable Long productId) {
-        return Result.success(productMapper.selectById(productId));
+        Product product = productMapper.selectById(productId);
+        // 适配老表: disable=1表示启用
+        if (product == null || product.getDisable() != 1) {
+            return Result.fail("产品不存在或已下架");
+        }
+        return Result.success(product);
     }
 }

@@ -130,6 +130,18 @@ const routes: RouteRecordRaw[] = [
     name: 'Commission',
     component: () => import('@/views/team/Commission.vue'),
     meta: { title: '佣金明细' }
+  },
+  {
+    path: '/coupon',
+    name: 'Coupon',
+    component: () => import('@/views/coupon/Index.vue'),
+    meta: { title: '优惠券' }
+  },
+  {
+    path: '/sign',
+    name: 'Sign',
+    component: () => import('@/views/sign/Index.vue'),
+    meta: { title: '每日签到' }
   }
 ]
 

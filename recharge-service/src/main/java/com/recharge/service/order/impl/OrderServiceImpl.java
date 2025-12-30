@@ -38,19 +38,23 @@ public class OrderServiceImpl implements OrderService {
     public Order createRechargeOrder(Long userId, RechargeRequest request) {
         // 1. 获取产品信息
         Product product = productMapper.selectById(request.getProductId());
+        // 适配老表: disable=1表示启用
         if (product == null || product.getDisable() != 1) {
             throw new BusinessException("产品不存在或已下架");
         }
 
-        // 2. 创建订单 - 使用原数据库字段
+        // 2. 创建订单
         Order order = new Order();
         order.setOrderNo(OrderNoGenerator.generate());
         order.setUserId(userId);
         order.setGoodsId(product.getId());
         order.setStoreId(request.getStoreId());
         order.setMobile(request.getMobile());
-        order.setPrice(new BigDecimal(product.getPrice()));        // 成本价
-        order.setPayAmount(new BigDecimal(product.getPrice()));    // 实付金额
+        // 适配老表: realPrice是实际售价 (Integer -> BigDecimal)
+        BigDecimal salePrice = product.getRealPrice() != null ?
+                BigDecimal.valueOf(product.getRealPrice()) : BigDecimal.ZERO;
+        order.setPrice(salePrice);                                  // 售价
+        order.setPayAmount(salePrice);                              // 实付金额
         order.setStatus(0);                                         // 订单状态: 0=待处理
         order.setPayStatus(0);                                      // 支付状态: 0=未付款
         order.setType(request.getStoreId() != null ? 0 : 1);       // 0=店铺充值, 1=首页充值

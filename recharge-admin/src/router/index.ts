@@ -43,6 +43,36 @@ const router = createRouter({
           name: 'Withdraws',
           component: () => import('@/views/Withdraws.vue'),
           meta: { title: '提现管理' }
+        },
+        {
+          path: 'stores',
+          name: 'Stores',
+          component: () => import('@/views/Stores.vue'),
+          meta: { title: '店铺管理' }
+        },
+        {
+          path: 'notices',
+          name: 'Notices',
+          component: () => import('@/views/Notices.vue'),
+          meta: { title: '公告管理' }
+        },
+        {
+          path: 'coupons',
+          name: 'Coupons',
+          component: () => import('@/views/Coupons.vue'),
+          meta: { title: '优惠券管理' }
+        },
+        {
+          path: 'banners',
+          name: 'Banners',
+          component: () => import('@/views/Banners.vue'),
+          meta: { title: '轮播图管理' }
+        },
+        {
+          path: 'settings',
+          name: 'Settings',
+          component: () => import('@/views/Settings.vue'),
+          meta: { title: '系统设置' }
         }
       ]
     }

@@ -53,4 +53,16 @@ public interface UserMapper extends BaseMapper<User> {
      */
     @Update("UPDATE cloud_times_api_user SET income_price = income_price - #{amount}, update_time = NOW() WHERE id = #{userId} AND income_price >= #{amount}")
     int deductCommissionBalance(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
+
+    /**
+     * 统计所有用户总余额
+     */
+    @org.apache.ibatis.annotations.Select("SELECT COALESCE(SUM(price), 0) FROM cloud_times_api_user WHERE delete_time IS NULL")
+    BigDecimal sumTotalBalance();
+
+    /**
+     * 统计所有用户总佣金
+     */
+    @org.apache.ibatis.annotations.Select("SELECT COALESCE(SUM(income_price), 0) FROM cloud_times_api_user WHERE delete_time IS NULL")
+    BigDecimal sumTotalCommission();
 }

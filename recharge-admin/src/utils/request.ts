@@ -29,6 +29,13 @@ request.interceptors.request.use(
 // 响应拦截器 - 处理错误
 request.interceptors.response.use(
   (response) => {
+    // 处理业务逻辑错误（HTTP 200 但 code 不是 200）
+    const res = response.data
+    if (res && res.code !== undefined && res.code !== 200) {
+      // 显示业务错误信息
+      message.error(res.message || '操作失败')
+      return Promise.reject(new Error(res.message || '操作失败'))
+    }
     return response
   },
   (error) => {
@@ -36,7 +43,7 @@ request.interceptors.response.use(
       const { status, config } = error.response
       // 如果是登录接口的 401/403 错误,不做特殊处理,让调用方处理
       const isLoginApi = config?.url?.includes('/auth/login')
-      
+
       if ((status === 401 || status === 403) && !isLoginApi) {
         message.error('登录已过期,请重新登录')
         localStorage.removeItem('admin_token')
